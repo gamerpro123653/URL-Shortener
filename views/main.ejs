@@ -1,0 +1,81 @@
+<html>
+    <head>
+      <title>Hieuhs Recapcha</title>
+      <link rel="stylesheet" href="../public/stylesheet/index.css" type="text/css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="center">
+            <h1>RÚT GỌN LINK</h1>
+            <form method="get" action="index.html">
+                <div class="txt_field">
+                    <input type="text" require class="original-link" id="original-link">
+                    <span></span>
+                    <label>Your Link</label>
+                </div>
+                <div class="txt_field">
+                    <input type="text" disabled class="short-link-generated" id="short-link-generated">
+                    <span></span>
+                </div>
+                <input type="button" value="Sinh Link" class="button">
+                <input type="button" value="Copy Link" class="button-copy">
+                <span class="tooltiptext" id="myTooltip" hidden>Copy to clipboard</span>
+            </form>
+            <div class="errorcode" hidden>
+                Link không hợp lệ, vui lòng thử lại
+            </div>
+        </div>
+
+        <div class="fixed-bottom container-fluid p-0">
+            <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+                © 2022 Copyright:
+                <a class="text-white" href="https://github.com/autoshgame">Hieuhs</a>
+            </div>
+        </div>
+    </body>
+</html>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>    
+<script type="text/javascript">
+    const generateLinkAPI = '<%= process.env.BASE_URL %>' + "/api/v1/url";
+
+    $('.button').click(() => {
+        let originURL = document.getElementById('original-link').value;
+        
+        fetch(generateLinkAPI, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                originalURL: originURL
+            })
+        })
+        .then((response) => {
+            if (response.status === 400) {
+                $('.errorcode').prop('hidden', false);
+                return Promise.reject("error");
+            }
+            else {
+                return response.json();
+            }
+        })
+        .then((data) => {
+            $('.errorcode').prop('hidden', true);
+            $('.short-link-generated').val(data.result);
+        })
+    });
+
+    $('.button-copy').click(() => {
+        let copiedContent = document.getElementById('short-link-generated');
+        copiedContent.select();
+        copiedContent.setSelectionRange(0, 99999)
+        navigator.clipboard.writeText(copiedContent.value);
+
+        $('.tooltiptext').prop('hidden', false);
+        setTimeout(() => {
+            $('.tooltiptext').prop('hidden', true);
+        }, 2000);
+    });
+</script>
